@@ -1,0 +1,35 @@
+{
+  "name": "react-tic-tac-toe-api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "serverstart": "DEBUG=blogpost-backend:* npm run devstart"
+  },
+  "dependencies": {
+    "async-handler": "^0.0.3",
+    "connect-mongo": "^4.6.0",
+    "cookie-parser": "~1.4.4",
+    "cookie-session": "^2.1.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "debug": "~2.6.9",
+    "dotenv": "^16.4.7",
+    "express": "~4.16.1",
+    "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.2.0",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "mongoose": "^8.6.2",
+    "morgan": "~1.9.1",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "session": "^0.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
