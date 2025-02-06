@@ -1,10 +1,10 @@
+require("dotenv").config();
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require("mongoose");
-const clientRouter = require("./routes/client");
 const session = require("express-session");
 const passport = require("passport");
 const MongoStore = require('connect-mongo');
@@ -37,9 +37,10 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl:mongoDB,
-    
   }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24},
+  cookie: { maxAge: 1000 * 60 * 60 * 24,
+            secure: false,
+  },
 }));
 
 app.use(passport.initialize());
@@ -68,7 +69,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send(err);
 });
 
 module.exports = app;
