@@ -11,17 +11,21 @@ const MongoStore = require('connect-mongo');
 const cors = require("cors");
 const authRouter = require('./routes/auth');
 
+const { webSocketInitilize } = require('./controllers/websocket_controller');
+
+
 const databaseUrl = process.env.DATABASE_URL;
 const frontEndUrl = process.env.FRONTEND_URL; 
+const wsUrl = process.env.WS_URL;
 
 var indexRouter = require('./routes/index');
-
 var app = express();
+
+app.use(cors({credentials: true, origin:[frontEndUrl, wsUrl]}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-app.use(cors({credentials: true, origin: frontEndUrl}));
 
 mongoose.set("strictQuery", false);
 const mongoDB = databaseUrl
@@ -52,6 +56,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+webSocketInitilize()
+
 
 app.use('/', indexRouter);
 app.use('/authenticate', authRouter);

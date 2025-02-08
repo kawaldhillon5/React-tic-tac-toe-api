@@ -86,7 +86,7 @@ exports.signUp = asyncHandler( async(req, res, next)=>{
   if(req.isAuthenticated()){
     res.send({userId: req.user._id, userName: req.user.userName, status: 200,});
   } else {
-    res.status(200).send({user:null});
+    res.status(200).send({userId:null});
   }
 });
 
