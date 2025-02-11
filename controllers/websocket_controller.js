@@ -40,6 +40,9 @@ exports.webSocketInitilize =  function() {
                         if(matchId){
                             const match = matchesBeingPlayed.get(ws.matchId);
                             if(match){
+                                match.boxValue.forEach((element, i) => {
+                                    match.boxValue[i] = '';
+                                });
                                 ws.send(JSON.stringify({type: 'match-initial-info', data:{matchId: ws.matchId, round: match.round, playerTurn: match.playerTurn.userName}}));
                                 ws.opponent.send(JSON.stringify({type: 'match-initial-info', data:{matchId: ws.matchId, round: match.round, playerTurn: match.playerTurn.userName}}));
                             }else{
@@ -54,6 +57,18 @@ exports.webSocketInitilize =  function() {
                         }else{
                             throw new Error('Could not find match in array');
                         }
+                        break;
+                    case "quit-match":
+                        {
+                            ws.opponent.send(JSON.stringify({type: 'error', message: `${ws.userName.userName} Quit`}));
+                            ws.opponent.isReady = false;
+                            ws.opponent.moves = [];
+                            ws.opponent.score = 0;
+                            ws.opponent.isTossReady = false;
+                            ws.opponent.matchId = '';
+                            matchesBeingPlayed.delete(ws.matchId);
+                            ws.close()
+                        }    
                         break;
                     default:                        
                         throw new Error('Invalid message type')
@@ -160,8 +175,6 @@ const toss = function(ws){
         ws.matchId = matchId
         ws.opponent.matchId = matchId;
         ws.score = 0
-        ws.inMatch = true;
-        ws.opponent.inMatch = true;
         ws.opponent.score = 0
         if(ws.id === randomWinner.id) {
             ws.mark = "X";
@@ -235,29 +248,24 @@ function checkWinner(ws, match, msgObj){
 
         if(roundWon){
             ws.score = ws.score + 1;
+            ws.isReady = false;
+            ws.opponent.isReady = false
+            ws.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
             ws.send(JSON.stringify({type: 'match-won', data:{positionArray : [`box${winnigCondition[0]}`,`box${winnigCondition[1]}`,`box${winnigCondition[2]}`], winner: true, winnerScore: ws.score, opponentScore: ws.opponent.score}}));
             ws.opponent.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
             ws.opponent.send(JSON.stringify({type: 'match-won', data:{positionArray : [`box${winnigCondition[0]}`,`box${winnigCondition[1]}`,`box${winnigCondition[2]}`], winner: false, winnerScore: ws.score, opponentScore: ws.opponent.score}}));
-            match.round = match.round +1;
-            match.player1.moves = [];
-            match.player2.moves = [];
-            match.boxValue.forEach((element, i) => {
-                match.boxValue[i] = '';
-            });
         } else if(!match.boxValue.includes('')){
-            match.round = match.round +1;
             match.playerTurn = ws.opponent;
-            match.player1.moves = [];
-            match.player2.moves = [];
-            match.boxValue.forEach((element, i) => {
-                match.boxValue[i] = '';
-            });
+            ws.isReady = false;
+            ws.opponent.isReady = false
             const player1Score = ws === match.player1 ? match.player1.score : match.player2.score;
             const player2Score = ws === match.player1 ? match.player2.score : match.player1.score;
+
+            ws.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
             ws.send(JSON.stringify({type: 'match-draw', data:{userScore: player1Score, opponentScore: player2Score}}));
+            ws.opponent.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
             ws.opponent.send(JSON.stringify({type: 'match-draw', data:{userScore: player2Score, opponentScore: player1Score}}));
         } else {
-            
             match.playerTurn =  ws.opponent
             ws.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
             ws.opponent.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
