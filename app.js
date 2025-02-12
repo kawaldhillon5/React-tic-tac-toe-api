@@ -17,7 +17,7 @@ const { webSocketInitilize } = require('./controllers/websocket_controller');
 const databaseUrl = process.env.DATABASE_URL;
 const frontEndUrl = process.env.FRONTEND_URL; 
 const wsUrl = process.env.WS_URL;
-
+console.log()
 var indexRouter = require('./routes/index');
 var app = express();
 
@@ -42,7 +42,10 @@ app.use(session({
   store: MongoStore.create({
     mongoUrl:mongoDB,
   }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24,
+  cookie: { httpOnly: true, 
+            sameSite:"none",
+            secure:true, 
+            maxAge: 1000 * 60 * 60 * 24,
   },
 }));
 
