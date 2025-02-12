@@ -4,7 +4,8 @@
  * Module dependencies.
  */
 
-import { webSocketInitilize } from '../controllers/websocket_controller';
+const { webSocketInitilize } = require('../controllers/websocket_controller');
+
 
 var app = require('../app');
 var debug = require('debug')('react-snake-api:server');
