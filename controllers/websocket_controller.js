@@ -40,6 +40,12 @@ exports.webSocketInitilize =  function() {
                         if(matchId){
                             const match = matchesBeingPlayed.get(ws.matchId);
                             if(match){
+                                if(match.moveTimerId){
+                                    clearTimeout(match.moveTimerId);
+                                }
+                                match.moveTimerId = setTimeout(()=>{
+                                   matchWon(match.playerTurn.opponent, "Time Out", [], match, false)
+                                },5000)
                                 match.boxValue.forEach((element, i) => {
                                     match.boxValue[i] = '';
                                 });
@@ -209,7 +215,25 @@ const beginMatch = function(ws){
     }
 }
 
-function checkWinner(ws, match, msgObj){
+function matchWon(ws, info, winnigCondition, match,cond, position){
+    ws.score = ws.score + 1;
+    ws.isReady = false;
+    ws.opponent.isReady = false
+    if(cond){
+        ws.opponent.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
+        ws.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
+    } else {
+        match.playerTurn = ws
+    }
+    ws.send(JSON.stringify({type: 'match-won', data:{positionArray : winnigCondition , winner: true, winnerScore: ws.score, opponentScore: ws.opponent.score, info:info}}));
+    ws.opponent.send(JSON.stringify({type: 'match-won', data:{positionArray : winnigCondition, winner: false, winnerScore: ws.score, opponentScore: ws.opponent.score, info:info}}));
+}
+
+function checkWinner(ws, match, msgObj, moveTimerId){
+    if(match.moveTimerId){
+        clearTimeout(match.moveTimerId);
+    }
+
     if(match.playerTurn = ws){
         const position = msgObj.data.position
         match.boxValue[Number(position.slice(3))] = msgObj.data.mark
@@ -247,13 +271,7 @@ function checkWinner(ws, match, msgObj){
         }
 
         if(roundWon){
-            ws.score = ws.score + 1;
-            ws.isReady = false;
-            ws.opponent.isReady = false
-            ws.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
-            ws.send(JSON.stringify({type: 'match-won', data:{positionArray : [`box${winnigCondition[0]}`,`box${winnigCondition[1]}`,`box${winnigCondition[2]}`], winner: true, winnerScore: ws.score, opponentScore: ws.opponent.score}}));
-            ws.opponent.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
-            ws.opponent.send(JSON.stringify({type: 'match-won', data:{positionArray : [`box${winnigCondition[0]}`,`box${winnigCondition[1]}`,`box${winnigCondition[2]}`], winner: false, winnerScore: ws.score, opponentScore: ws.opponent.score}}));
+            matchWon(ws, '', [`box${winnigCondition[0]}`,`box${winnigCondition[1]}`,`box${winnigCondition[2]}`], match, true, position, moveTimerId)
         } else if(!match.boxValue.includes('')){
             match.playerTurn = ws.opponent;
             ws.isReady = false;
@@ -269,7 +287,10 @@ function checkWinner(ws, match, msgObj){
             match.playerTurn =  ws.opponent
             ws.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
             ws.opponent.send(JSON.stringify({type: 'move', data:{matchId: ws.matchId, round: match.round, mark:ws.mark, position: position, playerTurn: match.playerTurn.userName}}));
-            
+
+            match.moveTimerId = setTimeout(()=>{
+                matchWon(match.playerTurn.opponent, "Time Out", [], match, false)
+            },5000)
         }
     } else {
         throw new Error("wrong player move");
