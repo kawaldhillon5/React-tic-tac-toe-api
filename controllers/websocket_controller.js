@@ -6,7 +6,7 @@ const { onTossRequest, checkWinner, quitMatch, beginMatch, setInitialBoxValues }
 
 
 exports.webSocketInitilize =  function() {
-    const wss = new WebSocket.Server({ port: 8080});
+    const wss = new WebSocket.Server({ port: 5174});
     const clientsfindingMatch = [];
     const matchesBeingPlayed = new Map();
 // WebSocket event handling
