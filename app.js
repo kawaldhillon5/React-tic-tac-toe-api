@@ -35,6 +35,7 @@ async function main() {
   await mongoose.connect(mongoDB);
 }
 
+app.set("trust proxy", 1);
 app.use(session({
   secret: "cats",
   resave: false, 
@@ -44,7 +45,7 @@ app.use(session({
   }),
   cookie: { httpOnly: true, 
             sameSite:"none",
-            secure:false, 
+            secure:true, 
             maxAge: 1000 * 60 * 60 * 24,
   },
 }));
