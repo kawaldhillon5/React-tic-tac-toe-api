@@ -43,7 +43,6 @@ app.use(session({
     mongoUrl:mongoDB,
   }),
   cookie: { maxAge: 1000 * 60 * 60 * 24,
-            secure: false,
   },
 }));
 
