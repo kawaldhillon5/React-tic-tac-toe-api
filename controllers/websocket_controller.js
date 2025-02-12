@@ -2,11 +2,12 @@ const WebSocket = require('ws');
 const User = require('../models/user');
 const { matchMaking } = require('../scripts/matchMaking');
 const { onTossRequest, checkWinner, quitMatch, beginMatch, setInitialBoxValues } = require('../scripts/gameLogic');
+const { Server } = require('ws');
 
 
 
-exports.webSocketInitilize =  function() {
-    const wss = new WebSocket.Server({ port: 5174});
+exports.webSocketInitilize =  function(httpServer) {
+    const wss = new WebSocket.Server({server: httpServer});
     const clientsfindingMatch = [];
     const matchesBeingPlayed = new Map();
 // WebSocket event handling
